@@ -1,0 +1,73 @@
+import boto3
+import csv
+import urllib.parse
+import json
+
+# AWS clients
+s3 = boto3.client("s3")
+kinesis = boto3.client("kinesis", region_name="ap-south-2")
+
+# Kinesis Data Stream name
+STREAM_NAME = "ds_stream_emp"
+BATCH_SIZE = 500  # Max 500 records per batch
+
+
+def lambda_handler(event, context):
+
+    # Validate S3 event
+    if "Records" not in event or len(event["Records"]) == 0:
+        return {
+            "status": "Failed",
+            "reason": "No S3 Records found in event",
+            "event": event
+        }
+
+    # Get bucket and key from the S3 event
+    record = event["Records"][0]
+    bucket = record["s3"]["bucket"]["name"]
+    key = urllib.parse.unquote_plus(record["s3"]["object"]["key"])
+
+    try:
+        # Read CSV from S3
+        response = s3.get_object(Bucket=bucket, Key=key)
+        content = response["Body"].read().decode("utf-8")
+        csv_reader = csv.DictReader(content.splitlines())
+
+        # Prepare records for Kinesis
+        records = [
+            {
+                "Data": json.dumps(row),
+                "PartitionKey": row.get("transaction_id", "default")
+            }
+            for row in csv_reader
+        ]
+
+        records_sent = 0
+
+        # Send in batches
+        for i in range(0, len(records), BATCH_SIZE):
+            batch = records[i:i + BATCH_SIZE]
+            resp = kinesis.put_records(
+                StreamName=STREAM_NAME,
+                Records=batch
+            )
+
+            records_sent += len(batch) - resp['FailedRecordCount']
+
+            if resp['FailedRecordCount'] > 0:
+                print(f"Failed records in batch: {resp['Records']}")
+
+        return {
+            "status": "Success",
+            "bucket": bucket,
+            "file": key,
+            "records_sent": records_sent
+        }
+
+    except Exception as e:
+        return {
+            "status": "Failed",
+            "reason": str(e),
+            "bucket": bucket,
+            "file": key
+        }

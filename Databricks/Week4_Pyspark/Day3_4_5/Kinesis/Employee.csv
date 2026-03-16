@@ -1,0 +1,10 @@
+Empid,EmpName,Salary,DeptId
+100,Rajesh,100000,10
+101,Kumar,200000,20
+100,Rajesh,100000,10
+102,Venkat,,30
+104,Sarath,300000,40
+105,Dilip,400000,50
+106,Srinu,500000,30
+107,Santh,550000,20
+108,Roja,600000,30

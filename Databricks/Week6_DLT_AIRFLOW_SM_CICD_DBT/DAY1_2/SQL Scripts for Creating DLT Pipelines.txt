@@ -1,0 +1,155 @@
+1.DLT_CUSTOMER_PIPELINE
+
+CREATE MATERIALIZED VIEW customers
+AS
+SELECT
+    CAST(customer_id AS INT) AS customer_id,
+    TRIM(first_name) AS first_name,
+    TRIM(last_name) AS last_name,
+    LOWER(email) AS email,
+    phone,
+    city,
+    TO_DATE(signup_date) AS signup_date,
+    TO_TIMESTAMP(updated_at) AS updated_at
+FROM demows.custdemo.raw_customers
+WHERE customer_id IS NOT NULL;
+
+
+2. DLT_CUSTOMERS_MEDALLION_PIPELINE
+
+SET pipelines.autoOptimize.managed = true;
+
+CREATE MATERIALIZED VIEW bronze_customers
+COMMENT "Bronze layer sourced from raw_customers table"
+AS
+SELECT *
+FROM demows.custdemo.raw_customers;
+
+CREATE MATERIALIZED VIEW silver_customers
+(
+  CONSTRAINT valid_customer EXPECT (customer_id IS NOT NULL),
+  CONSTRAINT valid_email EXPECT (email LIKE '%@%')
+)
+COMMENT "Cleaned and transformed customers"
+AS
+SELECT
+    CAST(customer_id AS INT)                      AS customer_id,
+    INITCAP(TRIM(first_name))                     AS first_name,
+    INITCAP(TRIM(last_name))                      AS last_name,
+    LOWER(TRIM(email))                            AS email,
+    REGEXP_REPLACE(phone, '[^0-9]', '')            AS phone,
+    INITCAP(TRIM(city))                           AS city,
+    TO_DATE(signup_date)                          AS signup_date,
+    TO_TIMESTAMP(updated_at)                      AS updated_at,
+    CURRENT_TIMESTAMP()                           AS processed_timestamp
+FROM bronze_customers
+WHERE customer_id IS NOT NULL
+QUALIFY ROW_NUMBER() OVER (
+    PARTITION BY customer_id
+    ORDER BY updated_at DESC
+) = 1;
+
+CREATE MATERIALIZED VIEW gold_customers_by_city
+COMMENT "Total customers by city"
+AS
+SELECT
+    city,
+    COUNT(*) AS total_customers
+FROM silver_customers
+GROUP BY city;
+
+CREATE MATERIALIZED VIEW gold_customer_signup_trend
+COMMENT "Monthly signup trend"
+AS
+SELECT
+    DATE_FORMAT(signup_date, 'yyyy-MM') AS signup_month,
+    COUNT(*) AS total_signups
+FROM silver_customers
+GROUP BY DATE_FORMAT(signup_date, 'yyyy-MM');
+
+CREATE MATERIALIZED VIEW gold_active_customers
+COMMENT "Customers active in last 90 days"
+AS
+SELECT
+    COUNT(*) AS active_customers
+FROM silver_customers
+WHERE updated_at >= current_timestamp() - INTERVAL 90 DAYS;
+
+3. DLT_S3_INGESTION_MEDALLION_LOADS
+
+
+-- Enable auto optimize
+SET pipelines.autoOptimize.managed = true;
+
+-- Bronze: Raw customers ingestion
+
+CREATE MATERIALIZED VIEW bronze_customers_s3_ingestion
+AS
+SELECT *
+FROM read_files(
+  's3://glue1235/raw_customers.csv',
+  format => 'csv',
+  header => true
+);
+
+CREATE MATERIALIZED VIEW silver_customers_S3
+(
+  CONSTRAINT valid_customer_id EXPECT (customer_id IS NOT NULL),
+  CONSTRAINT valid_email EXPECT (email LIKE '%@%')
+)
+COMMENT "Cleaned and transformed customer data"
+AS
+SELECT
+    CAST(customer_id AS INT)                 AS customer_id,
+    INITCAP(TRIM(first_name))                AS first_name,
+    INITCAP(TRIM(last_name))                 AS last_name,
+    LOWER(TRIM(email))                       AS email,
+    REGEXP_REPLACE(phone, '[^0-9]', '')      AS phone,
+    INITCAP(TRIM(city))                      AS city,
+    TO_DATE(signup_date)                     AS signup_date,
+    TO_TIMESTAMP(updated_at)                 AS updated_at,
+    CURRENT_TIMESTAMP()                      AS processed_timestamp
+FROM bronze_customers_s3_ingestion
+WHERE customer_id IS NOT NULL
+QUALIFY ROW_NUMBER() OVER (
+    PARTITION BY customer_id
+    ORDER BY updated_at DESC
+) = 1;
+
+-- GOLD LOADS
+
+CREATE MATERIALIZED VIEW gold_customers_by_city_S3
+COMMENT "Customer distribution by city"
+AS
+SELECT
+    city,
+    COUNT(*) AS total_customers
+FROM silver_customers_S3
+GROUP BY city;
+
+CREATE MATERIALIZED VIEW gold_customer_signup_trend_S3
+COMMENT "Monthly customer signup trend"
+AS
+SELECT
+    DATE_FORMAT(signup_date, 'yyyy-MM') AS signup_month,
+    COUNT(*) AS total_signups
+FROM silver_customers_s3
+GROUP BY DATE_FORMAT(signup_date, 'yyyy-MM');
+
+CREATE MATERIALIZED VIEW gold_active_customers_s3
+COMMENT "Customers updated in last 90 days"
+AS
+SELECT
+    COUNT(*) AS active_customers
+FROM silver_customers_s3
+WHERE updated_at >= current_date() - INTERVAL 90 DAYS;
+
+
+4. DLT_Expectations_Customer
+
+CREATE OR REFRESH STREAMING TABLE customers_clean(
+  CONSTRAINT valid_customer_id EXPECT (customer_id IS NOT NULL) ON VIOLATION DROP ROW,
+  CONSTRAINT valid_email EXPECT (email LIKE '%@%') ON VIOLATION DROP ROW
+) AS
+SELECT *
+FROM STREAM(customers_raw);

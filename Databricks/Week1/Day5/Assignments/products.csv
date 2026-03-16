@@ -1,0 +1,7 @@
+ProductID,ProductName,Category,Price
+101,Laptop,Electronics,55000.0
+102,Mobile,Electronics,18000.0
+103,Tablet,,22000.0
+104,Monitor,Electronics,
+102,Mobile,Electronics,18000.0
+105,Keyboard,,1500.0

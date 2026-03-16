@@ -1,0 +1,90 @@
+How to Manage Data in S3 Using Databricks?
+
+Databricks can read, write, transform, and manage data stored in S3 using Spark and Delta Lake.
+
+There are 3 common methods.
+
+1. Directly Access S3 Using Path:
+======================================
+
+You can directly read or write data using the S3 path.
+
+Example: Read data from S3
+df = spark.read.format("csv") \
+.option("header","true") \
+.load("s3://my-bucket/sales/data.csv")
+
+Write data to S3
+df.write.format("parquet") \
+.save("s3://my-bucket/output/")
+
+
+Supported formats:
+
+CSV
+
+JSON
+
+Parquet
+
+Delta
+
+------------------------------------------------
+
+2. Mount S3 Bucket to DBFS:
+====================================
+
+You can mount S3 to Databricks File System (DBFS) so it behaves like a local directory.
+
+Example mount:
+
+dbutils.fs.mount(
+source="s3a://my-bucket",
+mount_point="/mnt/data",
+extra_configs={"fs.s3a.access.key":"ACCESS_KEY",
+               "fs.s3a.secret.key":"SECRET_KEY"}
+)
+
+
+After mounting:
+
+df = spark.read.csv("/mnt/data/sales/data.csv")
+
+
+Benefits:
+
+Easier path access
+
+Reusable across notebooks
+
+⚠️ Modern best practice is not mounting but using Unity Catalog external locations.
+
+--------------------------------------------------------------------------
+
+3. Using Delta Tables on S3 (Recommended):
+=================================================
+
+Databricks stores Delta tables directly in S3.
+
+Example:
+
+CREATE TABLE sales
+USING DELTA
+LOCATION 's3://my-bucket/delta/sales'
+
+
+Then query:
+
+SELECT * FROM sales;
+
+
+Delta Lake features:
+
+ACID transactions
+
+Time travel
+
+Schema enforcement
+
+Uses Delta Lake.
+

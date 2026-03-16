@@ -1,0 +1,61 @@
+Technical Analysis: Write Queries using MYSQL Tables Data 
+
+Plot daily closing price trends per stock
+
+Identify highest volatility stock
+
+Volume vs price movement correlation
+
+Moving averages (7-day, 30-day)
+===============================================
+
+Business rules to be implemented:
+
+1.Missing Value Treatment:
+
+Column		Rule
+close_price	Replace with median close_price per stock
+volume	Replace with 0
+high_price	Replace with max(open_price, close_price)
+low_price	Replace with min(open_price, close_price)
+
+2.Price Sanity Checks:
+
+high_price ≥ open_price AND close_price
+
+low_price ≤ open_price AND close_price
+
+If violated → auto-correct
+
+3. Trend Classification
+Condition	Trend
+daily_return > 0	UP
+daily_return < 0	DOWN
+daily_return = 0	NO_CHANGE
+----------------------------------------------------------
+
+----------------------------------------------
+
+ETL Pipeline Flow:
+
+CSV files (dirty data)
+        ↓
+Python ETL (Pandas)
+  - Deduplication
+  - Null handling
+  - Business rules
+        ↓
+MySQL clean tables (DDL + constraints)
+        ↓
+SQL analytics + Matplotlib dashboards
+
+
+---------------------------------
+
+Business Insights:
+
+Best performing stock by average returns
+
+Days with abnormal volume spikes
+
+UP vs DOWN trend ratio per company

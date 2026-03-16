@@ -1,0 +1,129 @@
+Databricks and SageMaker Integration
+
+1. Typical Architecture
+Amazon S3 (Raw Data)
+        │
+        ▼
+Databricks (Data Processing & Feature Engineering)
+        │
+        ▼
+Model Training (Spark ML / SageMaker)
+        │
+        ▼
+MLflow Model Tracking
+        │
+        ▼
+SageMaker Endpoint (Deployment)
+        │
+        ▼
+Application Predictions
+
+
+Storage layer usually uses Amazon S3.
+
+2. Integration Methods:
+
+There are 3 main ways to integrate Databricks with SageMaker.
+
+Method 1: Train Model in Databricks → Deploy in SageMaker
+Steps
+
+1. Process data in Databricks
+2. Train model using Spark ML or Python libraries
+3. Save model to S3
+4. Deploy model using SageMaker endpoint
+
+Example
+
+Save model to S3
+
+model.save("s3://ml-model-bucket/model/")
+
+
+Then SageMaker loads the model from S3.
+
+Method 2: Use SageMaker Training from Databricks
+
+Databricks can trigger SageMaker training jobs using the AWS SDK (boto3).
+
+Example:
+
+import boto3
+
+sagemaker = boto3.client('sagemaker')
+
+response = sagemaker.create_training_job(
+    TrainingJobName='customer-model',
+    AlgorithmSpecification={
+        'TrainingImage': 'image-uri',
+        'TrainingInputMode': 'File'
+    }
+)
+
+
+Workflow:
+
+Databricks Notebook
+        │
+        ▼
+Trigger SageMaker Training Job
+        │
+        ▼
+SageMaker trains model
+
+Method 3: MLflow Integration
+
+Models trained in Databricks can be deployed to SageMaker using MLflow.
+
+Example
+mlflow.sagemaker.deploy(
+    app_name="customer-churn-model",
+    model_uri="models:/churn_model/Production"
+)
+
+
+MLflow handles:
+
+Packaging model
+
+Creating SageMaker endpoint
+
+Deploying model
+
+3. Feature Store Integration
+
+Databricks Feature Store stores ML features.
+
+SageMaker uses those features for training and prediction.
+
+Example pipeline:
+
+Databricks Feature Store
+        │
+        ▼
+Training Dataset
+        │
+        ▼
+SageMaker Training
+
+------------------------------
+
+Amazon S3
+   │
+   ▼
+Databricks ETL Pipeline
+   │
+   ▼
+Feature Engineering
+   │
+   ▼
+MLflow Tracking
+   │
+   ▼
+SageMaker Model Training
+   │
+   ▼
+SageMaker Endpoint Deployment
+   │
+   ▼
+Real-time Predictions

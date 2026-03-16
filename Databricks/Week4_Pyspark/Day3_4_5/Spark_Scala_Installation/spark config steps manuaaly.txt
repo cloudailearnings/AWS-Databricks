@@ -1,0 +1,15 @@
+step1: install java
+step2: set up spark using zip extract
+       C:\spark\bin
+step3: set up path in env var
+
+setx JAVA_HOME "C:\Program Files\Eclipse Adoptium\jdk-11.0.30.7-hotspot" /M
+
+setx PATH "%JAVA_HOME%\bin;C:\spark\bin;C:\hadoop\bin;%PATH%" /M
+
+Make sure java is first then spark then Hadoop in order 
+
+step 4: check echo "%Java_home%" and Echo "%path%"
+
+step 5 : go to CD spark\bin and run spark-shell.cmd
+

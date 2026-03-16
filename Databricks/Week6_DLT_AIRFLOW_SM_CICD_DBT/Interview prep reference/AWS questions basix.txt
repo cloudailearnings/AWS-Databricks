@@ -1,0 +1,904 @@
+AWS :
+
+What are Delta Live Tables ?
+
+What are Data streams?
+
+What are Access control lists and types of ACL's in detail?
+
+Airflow:
+
+1.what is airflow?
+
+Apache Airflow is a workflow orchestration tool used to schedule, monitor, and manage data pipelines.
+
+It allows developers to define workflows as DAGs (Directed Acyclic Graphs) using Python.
+
+Example use cases:
+
+ETL pipelines
+
+ML pipelines
+
+Data ingestion workflows
+
+2.What is a DAG in Airflow?
+
+A DAG (Directed Acyclic Graph) represents a workflow pipeline consisting of tasks and dependencies.
+
+Characteristics:
+
+Directed → tasks follow a specific order
+
+Acyclic → no loops allowed
+
+Example:
+
+Extract → Transform → Load
+
+3. What are the key components of Airflow?
+
+Main components include:
+
+DAGs
+
+Tasks
+
+Operators
+
+Scheduler
+
+Web UI
+
+Metadata Database
+
+Executor
+
+4. What is an Operator in Airflow?
+
+Operators define what task needs to be executed.
+
+Common operators:
+
+BashOperator
+
+PythonOperator
+
+EmailOperator
+
+DatabricksSubmitRunOperator
+
+Example:
+
+from airflow.operators.python import PythonOperator
+
+5. What is a Task in Airflow?
+
+A task is a single unit of work in a DAG.
+
+Example tasks:
+
+Run SQL query
+
+Trigger Spark job
+
+Move file to S3
+
+6. What is the Airflow Scheduler?
+
+The scheduler:
+
+Monitors DAGs
+
+Triggers tasks
+
+Handles dependencies
+
+It decides when tasks should run.
+
+7. What is Amazon MWAA?
+
+Amazon MWAA is a managed service for Apache Airflow provided by AWS.
+
+Benefits:
+
+No infrastructure management
+
+Auto scaling
+
+Built-in logging
+
+Integration with AWS services
+
+8. How does MWAA work?
+
+Architecture:
+
+S3 (DAG files)
+   ↓
+MWAA Environment
+   ↓
+Airflow Scheduler
+   ↓
+Workers execute tasks
+
+
+DAGs are stored in S3 and automatically loaded by MWAA.
+
+9. What is the Airflow UI?
+
+Airflow UI is a web interface used to:
+
+Monitor DAG runs
+
+View task status
+
+Trigger pipelines manually
+
+Debug failures
+
+10. How do you design a DAG?
+
+Steps:
+
+Define DAG
+
+Define tasks
+
+Set dependencies
+
+Schedule execution
+
+Example:
+
+with DAG('etl_pipeline') as dag:
+
+11. What are Task Dependencies?
+
+Task dependencies define execution order between tasks.
+
+Example:
+
+task1 >> task2 >> task3
+
+
+This means:
+
+task1 → task2 → task3
+
+
+12. What are Dynamic DAGs?
+
+Dynamic DAGs generate tasks dynamically at runtime.
+
+Example use case:
+
+Processing multiple files automatically.
+
+13. What are Parameterized DAGs?
+
+Parameterized DAGs accept runtime parameters.
+
+Example:
+
+dag_run.conf["date"]
+
+
+Used for:
+
+Running pipelines for different dates.
+
+14. What are Airflow Connections?
+
+Connections store credentials for external systems.
+
+Example connections:
+
+AWS
+
+Databricks
+
+MySQL
+
+Postgres
+
+15. What are Hooks in Airflow?
+
+Hooks are interfaces used to connect Airflow with external systems.
+
+Examples:
+
+S3Hook
+
+PostgresHook
+
+DatabricksHook
+
+16. How do you monitor Airflow pipelines?
+
+Monitoring methods:
+
+Airflow UI
+
+CloudWatch logs (in MWAA)
+
+Task logs
+
+Alerts
+
+17. How do you troubleshoot failed DAGs?
+
+Steps:
+
+Check task logs
+
+Verify dependencies
+
+Check scheduler logs
+
+Validate DAG code
+
+18. How do you integrate Databricks with Airflow?
+
+Airflow triggers Databricks jobs using operators.
+
+Common operator:
+
+DatabricksSubmitRunOperator
+
+
+Used to trigger:
+
+Spark jobs
+
+Notebooks
+
+Workflows
+
+19. What is DatabricksSubmitRunOperator?
+
+Operator used to trigger Databricks jobs from Airflow.
+
+Example:
+
+DatabricksSubmitRunOperator(
+ task_id='run_databricks_job'
+)
+
+
+20. How does Airflow orchestrate Databricks jobs?
+
+Pipeline example:
+
+S3 → Airflow → Databricks → Delta Tables → BI
+
+
+Steps:
+
+Airflow DAG starts
+
+Reads data from S3
+
+Triggers Databricks notebook
+
+Processes data
+
+Stores Delta tables
+
+21. How does Airflow integrate with AWS services?
+
+Airflow supports many AWS services.
+
+Examples:
+
+Amazon S3 – data storage
+
+AWS Glue – ETL jobs
+
+Amazon RDS – databases
+
+22. What is Job Orchestration?
+
+Job orchestration means coordinating multiple tasks across systems.
+
+Example:
+
+Ingest Data → Run Spark Job → Validate Data → Load to Warehouse
+
+
+Airflow manages this entire pipeline.
+
+23. What are best practices for Airflow DAGs?
+
+Best practices include:
+
+Keep tasks small
+
+Avoid heavy computation in DAG files
+
+Use task retries
+
+Use logging
+
+24. What is retry mechanism in Airflow?
+
+If a task fails, Airflow retries automatically.
+
+Example:
+
+retries=3
+
+25. What is backfilling in Airflow?
+
+Backfilling allows running DAGs for past dates.
+
+Example:
+
+Process data for last 7 days
+
+How does Airflow work with Databricks and S3?
+
+Typical enterprise architecture:
+
+Amazon S3
+     │
+     ▼
+Apache Airflow (MWAA)
+     │
+     ▼
+Databricks Notebook
+     │
+     ▼
+Delta Lake Tables
+     │
+     ▼
+Power BI / Tableau
+
+
+Airflow schedules and orchestrates the entire pipeline.
+
+Advantages of Airflow + Databricks:
+
+Benefit		Description
+
+Scheduling	Automate jobs
+Orchestration	Manage pipelines
+Monitoring	Track job status
+Scalability	Run large data workflows
+
+=====================================
+
+MLlib, MLflow & SageMaker Interview Questions
+
+1. What is MLlib in Spark?
+
+Answer:
+Apache Spark MLlib is a distributed machine learning library built on Apache Spark used for scalable machine learning on big data.
+
+It supports:
+
+Classification
+
+Regression
+
+Clustering
+
+Recommendation systems
+
+Feature engineering
+
+Example algorithms:
+
+Linear Regression
+
+Logistic Regression
+
+Random Forest
+
+K-Means
+
+2. What are the key ML components in Databricks?
+
+In Databricks, the ML ecosystem includes:
+
+Spark MLlib
+
+MLflow
+
+Feature Store
+
+AutoML
+
+Notebooks
+
+Model Registry
+
+These components help build end-to-end ML pipelines.
+
+3. What is Amazon SageMaker?
+
+Amazon SageMaker is a fully managed service used to:
+
+Build ML models
+
+Train models at scale
+
+Deploy models as APIs
+
+Capabilities include:
+
+Model training
+
+Model deployment
+
+Feature Store
+
+Model monitoring
+
+4. How does Databricks integrate with SageMaker?
+
+Typical workflow:
+
+Data Processing → Databricks
+Model Training → Spark ML / SageMaker
+Model Tracking → MLflow
+Deployment → SageMaker Endpoints
+
+
+Databricks prepares data while SageMaker handles large-scale training and deployment.
+
+5. What is Feature Engineering?
+
+Feature engineering is the process of transforming raw data into useful features for machine learning models.
+
+Examples:
+
+Encoding categorical variables
+
+Normalizing values
+
+Creating new derived columns
+
+Example:
+
+Age → Age Group
+Salary → Salary Range
+
+6. What is a Feature Store?
+
+A Feature Store stores reusable ML features for training and inference.
+
+Example:
+
+customer_features
+    ├── age
+    ├── income
+    ├── purchase_count
+
+
+Benefits:
+
+Feature reuse
+
+Consistency between training and prediction
+
+Reduced feature duplication
+
+7. What is MLflow?
+
+MLflow is an open-source platform used to manage the machine learning lifecycle.
+
+MLflow components:
+
+Component	Purpose
+Tracking	Track experiments
+Projects	Package ML code
+Models	Manage model formats
+Model Registry	Manage model versions
+8. What is MLflow Tracking?
+
+MLflow tracking records:
+
+Parameters
+
+Metrics
+
+Models
+
+Artifacts
+
+Example:
+
+mlflow.log_param("n_estimators",100)
+mlflow.log_metric("accuracy",0.92)
+
+9. What is Model Versioning?
+
+Model versioning tracks different versions of ML models.
+
+Example:
+
+Model v1 → Accuracy 85%
+Model v2 → Accuracy 92%
+
+
+This helps in:
+
+Rollbacks
+
+Comparing models
+
+Production management
+
+10. What is Model Deployment?
+
+Model deployment means making the trained model available for predictions.
+
+Deployment options:
+
+REST APIs
+
+Batch predictions
+
+Streaming predictions
+
+11. What are SageMaker Endpoints?
+
+SageMaker endpoints provide real-time model inference APIs.
+
+Example architecture:
+
+Client Application
+        │
+        ▼
+SageMaker Endpoint
+        │
+        ▼
+ML Model
+
+
+Used for real-time predictions.
+
+12. What is Model Evaluation?
+
+Model evaluation measures how well a model performs.
+
+Common metrics:
+
+Model Type	Metrics
+Classification	Accuracy, Precision, Recall
+Regression	RMSE, MAE
+13. What is Hyperparameter Tuning?
+
+Hyperparameter tuning improves model performance by optimizing parameters.
+
+Example parameters:
+
+learning_rate
+
+max_depth
+
+number_of_trees
+
+14. What is an ML Pipeline?
+
+An ML pipeline automates the ML workflow.
+
+Typical pipeline:
+
+Data Ingestion
+      ↓
+Data Cleaning
+      ↓
+Feature Engineering
+      ↓
+Model Training
+      ↓
+Model Evaluation
+      ↓
+Model Deployment
+
+15. How is ML pipeline automation implemented?
+
+Automation tools:
+
+Airflow
+
+MLflow
+
+SageMaker Pipelines
+
+Databricks Workflows
+
+Example pipeline:
+
+S3 → Databricks → MLflow → SageMaker Endpoint
+
+17. Difference between MLlib and scikit-learn?
+
+Feature		MLlib		scikit-learn
+Data size	Big data	Small/medium
+Processing	Distributed	Single machine
+Framework	Spark		Python
+
+18. What is the role of Databricks in ML workflows?
+
+Databricks helps with:
+
+Data preparation
+
+Feature engineering
+
+Model training with Spark
+
+Experiment tracking using MLflow
+
+Deployment can be done using SageMaker endpoints.
+
+19.How to you utilise MLFLOW with sage maker?
+
+20.What steps you follow for predictive modelling and analytics using databricks MLFLOW with sage maker deployments? 
+
+21.How do you integrate AWS secrets manager?
+
+22.wht is AWS systems Manager Paramter store
+
+23.Wht is data encryption and how do you implement it in aws and databricks
+
+24.How can we integrate KMS and what are all the aws services we can use kms for integration?
+
+25.What is cloudtrail and how it helps in aws ?
+
+26.How  do you integrate CloudTrail in aws? 
+
+27.What is CICD and How do you implement CICD Pipeline in AWS ?  ( REFER AWS DEVOPS TOOLS IN DRIVE)
+
+
+28. Explain about code commit,code build,code deploy and code pipeline in detail ( REFER AWS DEVOPS TOOLS IN DRIVE) 
+
+HOW DO YOU AUTOMATE DEPLOYEMNT OF RESOURCES USING AWS CODEPIPELINE AND CODE COMMIT,BUILD AND DEPLOY WHAT STEPS YOU FOLLOW? ( REFER AWS DEVOPS TOOLS IN DRIVE) 
+
+
+29.How do you automate the Infrastructure setup IN AWS and Databrick? ( REFER INFRASTRUCTURE AS A CODE IN DRIVE)
+
+
+30. How do you manage databricks resources? ( REFER INFRASTRUCTURE AS A CODE IN DRIVE)
+
+
+31.What is environment provisioning and how it helps in infra setup automation in aws ?  ( REFER INFRASTRUCTURE AS A CODE IN DRIVE)
+
+
+32.What is Obervablity and what strategies we follow to implement it in AWS? ( REFER INFRASTRUCTURE AS A CODE IN DRIVE)
+
+===================
+
+DBT
+
+1. What is DBT?
+
+Answer:
+dbt (Data Build Tool) is used for data transformation in modern data warehouses.
+
+It allows data engineers and analysts to write SQL-based transformations and build data pipelines.
+
+DBT focuses mainly on:
+
+Transforming data
+
+Testing data
+
+Documenting data models
+
+2. What problem does DBT solve?
+
+DBT solves problems like:
+
+Complex SQL pipelines
+
+Lack of version control in transformations
+
+Data quality issues
+
+Poor documentation
+
+DBT introduces software engineering practices to data transformation.
+
+3. What are the main components of DBT?
+
+Key components include:
+
+Component	Description
+Models	SQL transformation files
+Seeds	Static CSV data
+Snapshots	Track data changes
+Tests	Data validation
+Documentation	Auto-generated docs
+4. What are DBT Models?
+
+Models are SQL files that define transformations.
+
+Example:
+
+SELECT *
+FROM raw_customers
+WHERE status = 'active'
+
+
+Each model creates a table or view in the warehouse.
+
+5. What types of DBT models exist?
+
+DBT supports three types:
+
+Type	Description
+View	Virtual table
+Table	Physical table
+Incremental	Updates only new data
+
+Example configuration:
+
+{{ config(materialized='table') }}
+
+6. What are DBT transformations?
+
+Transformations convert raw data into analytics-ready datasets.
+
+Example pipeline:
+
+Raw Data → Cleaned Data → Aggregated Data
+
+
+DBT manages these transformations using SQL models.
+
+7. What is Incremental Loading in DBT?
+
+Incremental models update only new or changed records instead of reprocessing all data.
+
+Example:
+
+{{ config(materialized='incremental') }}
+
+
+Benefits:
+
+Faster pipelines
+
+Reduced compute cost
+
+8. What are DBT tests?
+
+DBT provides built-in tests to ensure data quality.
+
+Common tests:
+
+Unique
+
+Not Null
+
+Relationships
+
+Accepted values
+
+Example:
+
+tests:
+  - unique
+  - not_null
+
+9. What is DBT Documentation?
+
+DBT automatically generates data lineage and documentation.
+
+Command:
+
+dbt docs generate
+
+
+It shows:
+
+Table relationships
+
+Model dependencies
+
+Data descriptions
+
+10. How does DBT integrate with Databricks?
+
+DBT connects to Databricks and runs SQL transformations on Delta tables.
+
+Workflow:
+
+Raw Data → Databricks Tables → DBT Transformations → Analytics Tables
+
+
+DBT executes SQL on Databricks clusters.
+
+11. How does DBT work with S3?
+
+Raw data is stored in Amazon S3.
+
+Example architecture:
+
+S3 Raw Data
+     │
+     ▼
+Databricks / Redshift
+     │
+     ▼
+DBT Transformations
+     │
+     ▼
+Analytics Tables
+
+
+DBT does not load data directly from S3 — it transforms data after it is loaded into a warehouse or lakehouse.
+
+12. How does DBT integrate with Redshift?
+
+DBT connects to Amazon Redshift to run SQL transformations.
+
+Example pipeline:
+
+S3 → Redshift → DBT Transformations → BI Tools
+
+
+DBT executes SQL directly in Redshift.
+
+13. What is DBT lineage?
+
+Lineage shows data dependencies between models.
+
+Example:
+
+raw_sales
+    │
+    ▼
+clean_sales
+    │
+    ▼
+sales_summary
+
+
+This helps understand how data flows.
+
+14. What are DBT Use Cases?
+
+Common use cases include:
+
+Data warehouse transformations
+
+Data quality testing
+
+Analytics data modeling
+
+Automated data pipelines
+
+15. What are advantages of DBT?
+
+Advantages include:
+
+SQL-based transformations
+
+Version control with Git
+
+Automated testing
+
+Documentation generation
+
+Modular pipelines
+
+Real Enterprise Architecture
+Amazon S3 (Raw Data)
+        │
+        ▼
+Databricks / Redshift
+        │
+        ▼
+DBT Transformations
+        │
+        ▼
+Analytics Tables
+        │
+        ▼
+Power BI / Tableau
+

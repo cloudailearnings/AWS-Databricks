@@ -1,0 +1,28 @@
+Windows PowerShell
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+Install the latest PowerShell for new features and improvements! https://aka.ms/PSWindows
+
+PS C:\WINDOWS\system32> cs install scala
+PS C:\WINDOWS\system32> cs list
+amm
+coursier
+cs
+sbt
+sbtn
+scala
+scala-cli
+scalac
+PS C:\WINDOWS\system32> $env:LOCALAPPDATA\Coursier\data\bin\scala.bat -version
+At line:1 char:18
++ $env:LOCALAPPDATA\Coursier\data\bin\scala.bat -version
++                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Unexpected token '\Coursier\data\bin\scala.bat' in expression or statement.
+    + CategoryInfo          : ParserError: (:) [], ParentContainsErrorRecordException
+    + FullyQualifiedErrorId : UnexpectedToken
+
+PS C:\WINDOWS\system32> cs install scala:2.13.12 --force
+Wrote scala
+PS C:\WINDOWS\system32>
+
+

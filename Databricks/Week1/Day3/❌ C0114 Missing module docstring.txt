@@ -1,0 +1,43 @@
+❌ C0114: Missing module docstring
+
+ Your file has no description at the top
+Fix: Add a docstring at the top of employee.py
+
+❌ C0115: Missing class docstring
+
+ Your class has no explanation
+ Fix: Add a docstring inside the class
+
+❌ C0103: Class name "employee" doesn't conform to PascalCase
+
+ Class names must be PascalCase
+
+employee ❌
+Employee ✅
+
+❌ W0622: Redefining built-in 'id'
+
+id is a Python built-in function
+Fix: Rename it to emp_id
+
+❌ C0116: Missing function or method docstring
+
+ Your method has no description
+Fix: Add a docstring inside the method
+
+❌ C0103: Method name "DisplayDetails" doesn't conform to snake_case
+
+Method names must be snake_case
+
+DisplayDetails ❌
+display_details ✅
+
+❌ R0903: Too few public methods
+
+ pylint expects at least 2 public methods by default
+Fix: Add another method (e.g., annual_salary)
+(or disable this rule in real projects)
+
+📉 Final score: 2.22 / 10
+
+This is normal for first run 

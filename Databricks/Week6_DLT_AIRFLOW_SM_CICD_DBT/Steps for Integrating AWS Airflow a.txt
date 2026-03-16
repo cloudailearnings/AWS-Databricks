@@ -1,0 +1,150 @@
+Steps for Integrating AWS Airflow and Databricks:
+
+Step 1: Create Databricks Workspace:
+==========================================
+
+First create a workspace in Databricks.
+
+This workspace will contain:
+
+Clusters
+
+Notebooks
+
+Jobs
+
+You will use the workspace URL to connect Airflow.
+
+Example:
+
+https://adb-1234567890.1.azuredatabricks.net
+
+Step 2: Generate Databricks Personal Access Token:
+======================================================
+
+Airflow authenticates to Databricks using a Personal Access Token.
+
+Steps:
+
+Go to Databricks Workspace
+
+Click User Settings
+
+Open Access Tokens
+
+Click Generate Token
+
+You will get something like:
+
+dapi123456789abcdef
+
+Step 3: Configure Airflow Connection:
+========================================
+
+In Airflow UI → Admin → Connections
+
+Create a new connection.
+
+Connection type:
+
+Databricks
+
+
+Example configuration:
+
+Field	Value
+Conn ID	databricks_default
+Host	Databricks workspace URL
+Password	Personal access token
+
+Step 4: Install Databricks Provider in Airflow:
+===================================================
+
+Airflow needs the Databricks provider package.
+
+Install:
+
+pip install apache-airflow-providers-databricks
+
+
+This package provides operators like:
+
+DatabricksSubmitRunOperator
+
+DatabricksRunNowOperator
+
+Step 5: Create Databricks Notebook:
+=======================================
+
+Example notebook in Databricks:
+
+print("Running Databricks Job from Airflow")
+
+
+Save notebook path:
+
+/Shared/etl_pipeline
+
+Step 6: Create Airflow DAG:
+==============================
+
+Create a DAG to trigger the Databricks notebook.
+
+Example:
+
+from airflow import DAG
+from airflow.providers.databricks.operators.databricks import DatabricksSubmitRunOperator
+from datetime import datetime
+
+dag = DAG(
+    'databricks_pipeline',
+    start_date=datetime(2024,1,1),
+    schedule_interval='@daily'
+)
+
+notebook_task = DatabricksSubmitRunOperator(
+    task_id='run_databricks_notebook',
+    databricks_conn_id='databricks_default',
+    notebook_task={
+        'notebook_path': '/Shared/etl_pipeline'
+    },
+    dag=dag
+)
+
+Step 7: Upload DAG to Airflow
+=================================
+
+If using Amazon MWAA, upload DAG to:
+
+S3 bucket → dags/
+
+
+Example:
+
+s3://mwaa-bucket/dags/databricks_pipeline.py
+
+
+Airflow automatically loads it.
+
+Step 8: Run the DAG
+=========================
+
+Now Airflow will:
+
+Airflow Scheduler
+        │
+        ▼
+Trigger DAG
+        │
+        ▼
+DatabricksSubmitRunOperator
+        │
+        ▼
+Databricks Notebook Execution
+
+
+You can monitor execution in:
+
+Airflow UI
+
+Databricks Jobs UI

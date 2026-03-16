@@ -1,0 +1,230 @@
+DBT
+
+1. What is DBT?
+
+Answer:
+dbt (Data Build Tool) is used for data transformation in modern data warehouses.
+
+It allows data engineers and analysts to write SQL-based transformations and build data pipelines.
+
+DBT focuses mainly on:
+
+Transforming data
+
+Testing data
+
+Documenting data models
+
+2. What problem does DBT solve?
+
+DBT solves problems like:
+
+Complex SQL pipelines
+
+Lack of version control in transformations
+
+Data quality issues
+
+Poor documentation
+
+DBT introduces software engineering practices to data transformation.
+
+3. What are the main components of DBT?
+
+Key components include:
+
+Component	Description
+Models		SQL transformation files
+Seeds		Static CSV data
+Snapshots	Track data changes
+Tests		Data validation
+Documentation	Auto-generated docs
+
+4. What are DBT Models?
+
+Models are SQL files that define transformations.
+
+Example:
+
+SELECT *
+FROM raw_customers
+WHERE status = 'active'
+
+
+Each model creates a table or view in the warehouse.
+
+5. What types of DBT models exist?
+
+DBT supports three types:
+
+Type	Description
+View	Virtual table
+Table	Physical table
+Incremental	Updates only new data
+
+Example configuration:
+
+{{ config(materialized='table') }}
+
+6. What are DBT transformations? ( refer to dbt transformations word document in day3)
+
+Transformations convert raw data into analytics-ready datasets.
+
+Example pipeline:
+
+Raw Data → Cleaned Data → Aggregated Data
+
+
+DBT manages these transformations using SQL models.
+
+7. What is Incremental Loading in DBT?
+
+Incremental models update only new or changed records instead of reprocessing all data.
+
+Example:
+
+{{ config(materialized='incremental') }}
+
+
+Benefits:
+
+Faster pipelines
+
+Reduced compute cost
+
+8. What are DBT tests?
+
+DBT provides built-in tests to ensure data quality.
+
+Common tests:
+
+Unique
+
+Not Null
+
+Relationships
+
+Accepted values
+
+Example:
+
+tests:
+  - unique
+  - not_null
+
+9. What is DBT Documentation?
+
+DBT automatically generates data lineage and documentation.
+
+Command:
+
+dbt docs generate
+
+
+It shows:
+
+Table relationships
+
+Model dependencies
+
+Data descriptions
+
+10. How does DBT integrate with Databricks? (refer DBT-DATABRICKS ppt in drive)
+
+DBT connects to Databricks and runs SQL transformations on Delta tables.
+
+Workflow:
+
+Raw Data → Databricks Tables → DBT Transformations → Analytics Tables
+
+
+DBT executes SQL on Databricks clusters.
+
+11. How does DBT work with S3?
+
+Raw data is stored in Amazon S3.
+
+Example architecture:
+
+S3 Raw Data
+     │
+     ▼
+Databricks / Redshift
+     │
+     ▼
+DBT Transformations
+     │
+     ▼
+Analytics Tables
+
+
+DBT does not load data directly from S3 — it transforms data after it is loaded into a warehouse or lakehouse.
+
+12. How does DBT integrate with Redshift?
+
+DBT connects to Amazon Redshift to run SQL transformations.
+
+Example pipeline:
+
+S3 → Redshift → DBT Transformations → BI Tools
+
+
+DBT executes SQL directly in Redshift.
+
+13. What is DBT lineage?
+
+Lineage shows data dependencies between models.
+
+Example:
+
+raw_sales
+    │
+    ▼
+clean_sales
+    │
+    ▼
+sales_summary
+
+
+This helps understand how data flows.
+
+14. What are DBT Use Cases?
+
+Common use cases include:
+
+Data warehouse transformations
+
+Data quality testing
+
+Analytics data modeling
+
+Automated data pipelines
+
+15. What are advantages of DBT?
+
+Advantages include:
+
+SQL-based transformations
+
+Version control with Git
+
+Automated testing
+
+Documentation generation
+
+Modular pipelines
+
+Real Enterprise Architecture
+Amazon S3 (Raw Data)
+        │
+        ▼
+Databricks / Redshift
+        │
+        ▼
+DBT Transformations
+        │
+        ▼
+Analytics Tables
+        │
+        ▼
+Power BI / Tableau

@@ -1,0 +1,118 @@
+-- View Customers
+SELECT * FROM customers;
+
+-- View Completed Orders
+SELECT * FROM orders WHERE status = 'Completed';
+
+
+--  JOIN QUERY
+
+SELECT 
+    c.customer_id,
+    c.customer_name,
+    c.city,
+    o.order_id,
+    o.order_date,
+    o.amount,
+    o.status
+FROM customers c
+JOIN orders o
+ON c.customer_id = o.customer_id;
+
+
+--  AGGREGATIONS
+
+
+-- Total Revenue
+SELECT SUM(amount) AS total_revenue
+FROM orders
+WHERE status = 'Completed';
+
+-- Revenue Per Customer
+SELECT 
+    c.customer_name,
+    SUM(o.amount) AS total_spent
+FROM customers c
+JOIN orders o
+ON c.customer_id = o.customer_id
+WHERE o.status = 'Completed'
+GROUP BY c.customer_name
+ORDER BY total_spent DESC;
+
+
+--  WINDOW FUNCTIONS
+
+
+-- Running Total
+SELECT 
+    order_date,
+    amount,
+    SUM(amount) OVER (
+        ORDER BY order_date
+        ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+    ) AS running_total
+FROM orders
+WHERE status = 'Completed';
+
+-- Top Customer by Revenue
+SELECT *
+FROM (
+    SELECT 
+        c.customer_name,
+        SUM(o.amount) AS total_spent,
+        RANK() OVER (ORDER BY SUM(o.amount) DESC) AS rnk
+    FROM customers c
+    JOIN orders o
+    ON c.customer_id = o.customer_id
+    WHERE o.status = 'Completed'
+    GROUP BY c.customer_name
+) t
+WHERE rnk = 1;
+
+
+--  MONTHLY REPORT
+
+
+WITH monthly_sales AS (
+    SELECT 
+        DATE_TRUNC('month', order_date) AS month,
+        SUM(amount) AS revenue
+    FROM orders
+    WHERE status = 'Completed'
+    GROUP BY DATE_TRUNC('month', order_date)
+)
+SELECT 
+    month,
+    revenue,
+    LAG(revenue) OVER (ORDER BY month) AS previous_month_revenue,
+    revenue - LAG(revenue) OVER (ORDER BY month) AS revenue_difference
+FROM monthly_sales;
+
+--  GOLD TABLE CREATION
+
+
+CREATE OR REPLACE TABLE gold_customer_summary AS
+SELECT 
+    c.customer_id,
+    c.customer_name,
+    c.city,
+    COUNT(o.order_id) AS total_orders,
+    SUM(o.amount) AS total_spent
+FROM customers c
+LEFT JOIN orders o
+ON c.customer_id = o.customer_id
+AND o.status = 'Completed'
+GROUP BY c.customer_id, c.customer_name, c.city;
+
+
+-- DELTA FEATURES
+
+
+-- Optimize
+OPTIMIZE orders;
+
+-- Vacuum
+VACUUM orders RETAIN 168 HOURS;
+
+-- Time Travel Example (change version number accordingly)
+-- SELECT * FROM orders VERSION AS OF 1;

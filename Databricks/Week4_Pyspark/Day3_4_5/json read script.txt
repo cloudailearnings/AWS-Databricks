@@ -1,0 +1,7 @@
+    import org.apache.spark.sql.SparkSession
+
+    val spark = SparkSession.builder().appName("JSONRead").master("local[*]").getOrCreate()
+
+    val df = spark.read.json("C:\\SRC_FILES\\emp.json")
+
+    df.show()

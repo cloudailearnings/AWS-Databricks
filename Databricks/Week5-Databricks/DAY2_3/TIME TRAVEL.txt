@@ -1,0 +1,51 @@
+SHOW CATALOGS;
+
+USE CATALOG demows;
+USE SCHEMA customerdemo_sch;
+
+-- Step 1: Create a Table in Unity Catalog
+
+CREATE TABLE sales1 (
+  id INT,
+  amount DOUBLE
+);
+
+INSERT INTO sales1 VALUES (1, 100.0);
+
+DESCRIBE HISTORY sales1;
+
+-- Step 2: Update Data (Create New Version)
+
+INSERT INTO sales1 VALUES (2, 200.0);
+
+-- STEP 3 :
+
+DESCRIBE HISTORY sales1;
+
+-- Step 4: Query Old Version (Time Travel)
+
+-- By Version
+
+SELECT * FROM sales1 VERSION AS OF 2;
+
+-- By Timestamp
+
+SELECT * FROM sales1 TIMESTAMP AS OF '2026-03-03T04:34:31.000+00:00';
+
+SELECT * FROM sales1 TIMESTAMP AS OF '2026-03-01T05:27:48.000+00:00';
+
+SELECT * FROM sales1 TIMESTAMP AS OF '2026-03-01T05:24:36.000+00:00';
+
+-- Step 5: Restore to Old Version
+
+RESTORE TABLE sales1 TO VERSION AS OF 0;
+
+-- REAL TIME SCENARIO
+
+DELETE FROM sales1;
+
+SELECT * FROM sales1;
+
+RESTORE TABLE sales1 TO VERSION AS OF 2;
+
+

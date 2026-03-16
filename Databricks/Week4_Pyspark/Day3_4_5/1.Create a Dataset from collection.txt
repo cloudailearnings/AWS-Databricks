@@ -1,0 +1,45 @@
+1.Create a Dataset from collection
+
+    val data = Seq(
+      (1, "Kumar", 28),
+      (2, "Ravi", 30),
+      (3, "Anita", 25)
+    )
+
+    val ds = data.toDS()
+    ds.show()
+
+2. Using Case Class
+
+case class Person(id: Int, name: String, age: Int)
+
+val people = Seq(
+  Person(1, "Kumar", 28),
+  Person(2, "Ravi", 30),
+  Person(3, "Anita", 25)
+)
+
+val ds = spark.createDataset(people)
+ds.show()
+
+3.Run Transformations
+
+val filtered = ds.filter($"age" > 27)
+filtered.show()
+
+val selected = ds.select("name")
+selected.show()
+
+
+3.Read from CSV File
+
+val ds = spark.read.option("header", "true").option("inferSchema", "true").csv("C:/scrfiles/Employee.csv")
+
+ds.show()
+
+
+
+Stop Spark
+
+spark.stop()
+

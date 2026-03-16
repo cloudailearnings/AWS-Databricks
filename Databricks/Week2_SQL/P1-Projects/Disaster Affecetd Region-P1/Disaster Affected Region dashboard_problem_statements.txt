@@ -1,0 +1,39 @@
+
+Business Rules to be Implemented:
+------------------------------------
+
+Replace missing disaster types with "Unknown"
+
+Convert invalid dates safely
+
+Fill population with median
+
+Missing affected people \& losses → 0
+
+Aggregate total affected people per region
+
+----------------------------------------------
+
+ETL Pipeline Flow:
+
+CSV files (dirty data)
+        ↓
+Python ETL (Pandas)
+  - Deduplication
+  - Null handling
+  - Business rules
+        ↓
+MySQL clean tables (DDL + constraints)
+        ↓
+SQL analytics + Matplotlib dashboards
+
+
+---------------------------------
+
+Dashboard Problem Statements(Matplotlib):
+
+1. Identify top 5 regions by total affected population.
+2. Compare disaster severity distribution by disaster type.
+3. Trend of disasters over time (monthly).
+4. Economic loss vs affected population scatter plot.
+5. Region-wise disaster frequency heatmap.

@@ -1,0 +1,379 @@
+Week5: Databricks
+
+1.Explain about lakehouse architecture
+
+2.Spark vs Databricks
+
+3.What is filestore in databricks
+
+4.What is a Cluster in Databricks?
+
+FileStore is a location in DBFS used to store files accessible from notebooks and web apps.
+
+Example path:
+
+/FileStore/
+
+Example:
+
+df.write.csv("/FileStore/data/output")
+
+In modern Databricks, Volumes / Unity Catalog storage are recommended instead of FileStore.
+
+
+
+A cluster is a group of virtual machines used to run Spark jobs.
+
+Types:
+
+All-purpose cluster – Used for interactive analysis
+
+Job cluster – Created automatically for running jobs
+
+SQL Server Warehouse
+
+Components:
+
+Driver node – Controls execution
+
+Worker nodes – Execute tasks
+
+5.What is Hive Metastore in Databricks?
+
+Apache Hive Metastore is a metadata repository that stores:
+
+Table schema
+
+Table location
+
+Partition details
+
+Example:
+
+CREATE TABLE employees (
+ id INT,
+ name STRING
+)
+
+The metadata is stored in Hive
+
+ Metastore, while data is stored in storage like S3.
+
+6.What file formats are supported in Databricks?
+
+| Format  | Description              |
+| ------- | ------------------------ |
+| CSV     | Text file                |
+| JSON    | Semi-structured data     |
+| Parquet | Columnar format          |
+| ORC     | Optimized column storage |
+| Delta   | Delta Lake format        |
+
+
+Example:
+
+df.read.parquet("s3://bucket/data")
+
+Databricks Security
+
+7. What are security features in Databricks?
+
+Security components include:
+
+Authentication
+
+Role Based Access Control (RBAC)
+
+Data encryption
+
+Table ACLs
+
+Unity Catalog
+
+Example:
+
+GRANT SELECT ON TABLE employees TO analyst;
+
+Delta Lake & Data Management
+
+8.What is Delta Lake?
+
+Delta Lake is a storage layer that brings ACID transactions to data lakes.
+
+Benefits:
+
+ACID transactions
+
+Schema enforcement
+
+Time travel
+
+Data versioning
+
+Example:
+
+CREATE TABLE employees
+USING DELTA
+LOCATION '/mnt/data/employees'
+
+9.Difference between Data Lake and Delta Lake
+
+| Feature            | Data Lake | Delta Lake |
+| ------------------ | --------- | ---------- |
+| Transactions       | No        | Yes        |
+| Schema enforcement | No        | Yes        |
+| Time travel        | No        | Yes        |
+| Data reliability   | Low       | High       |
+
+
+ACID Transactions
+
+10.What are ACID transactions?
+
+ACID means:
+
+Property	Meaning
+Atomicity	All or nothing
+Consistency	Data remains valid
+Isolation	Transactions do not interfere
+Durability	Data persists after commit
+
+Delta Lake provides ACID transactions on data lakes.
+
+11.What is Schema Evolution?
+
+
+Schema evolution allows adding new columns to Delta tables without rewriting data.
+
+Example:
+
+df.write.format("delta") \
+.option("mergeSchema","true") \
+.mode("append") \
+.save("/mnt/delta/employees")
+
+12. What is Time Travel in Delta Lake?
+
+
+Time Travel allows querying previous versions of data. we can restore data objects back using restore command .
+
+Example:
+
+SELECT * FROM employees VERSION AS OF 5;
+
+Or:
+
+SELECT * FROM employees TIMESTAMP AS OF '2024-01-01';
+
+Uses:
+
+Data recovery
+
+Auditing
+
+Debugging
+
+13.Optimization
+
+What is OPTIMIZE in Delta Lake?
+
+OPTIMIZE improves query performance by compacting small files.
+
+Example:
+
+OPTIMIZE employees;
+
+With Z-Order:
+
+OPTIMIZE employees
+ZORDER BY (employee_id);
+
+ZORDER:
+
+Optimizes data skipping by sorting files / filter operations / join /aggregate operations.
+
+OPTIMIZE sales ZORDER BY (customer_id)
+
+
+Data Quality & Validation
+
+14. How does Delta Lake support Data Quality?
+
+Delta Lake supports constraints and validation rules.
+
+Example:
+
+ALTER TABLE employees
+ADD CONSTRAINT age_check
+CHECK (age > 18);
+
+Benefits:
+
+Prevent bad data
+
+Maintain data integrity
+
+15.What is the difference between Parquet and Delta?
+
+Feature	Parquet	Delta
+File format	Yes	Built on Parquet
+ACID transactions	No	Yes
+Time travel	No	Yes
+Schema enforcement	Limited	Yes'''
+
+16.What is VACUUM?
+
+VACUUM table RETAIN 168 HOURS
+
+17.What is Medallion Architecture? explain  detail
+
+18.What is Autoloader?
+
+Feature to incrementally ingest files from cloud storage.
+
+19. What is Unity Catalog?
+
+Unity Catalog is a centralized data governance and access control system in Databricks used to manage data security, permissions, and metadata across the entire data platform.
+
+It allows organizations to control who can access data, tables, files, and machine learning models from one central place.
+
+It helps organizations manage:
+
+Data access permissions
+
+Data lineage
+
+Data discovery
+
+Data governance
+
+Audit logging
+
+This is very important in enterprises handling sensitive data.
+
+Unity Catalog uses a 3-level namespace structure. Catalog → Schema → Table
+
+sales_catalog.sales_schema.customer_table
+
+Key Features of Unity Catalog:
+
+1. Centralized Governance
+
+One place to manage all data permissions.
+
+2. Fine-Grained Access Control
+
+Control access at different levels:
+
+Catalog level
+
+Schema level
+
+Table level
+
+Column level
+
+Row level
+
+Example:
+
+GRANT SELECT ON TABLE sales.customers TO analyst;
+
+3. Data Lineage
+
+Shows how data flows between tables and pipelines.
+
+Example:
+
+Raw Data → ETL → Silver Table → Gold Table
+
+4. Data Discovery
+
+Users can easily find datasets using metadata.
+
+5. Audit Logging
+
+Tracks who accessed what data.
+
+----------------
+
+20.Unity Catalog vs Hive Metastore
+
+| Feature                 | Hive Metastore | Unity Catalog |
+| ----------------------- | -------------- | ------------- |
+| Governance              | Limited        | Centralized   |
+| Security                | Basic          | Advanced      |
+| Column-level security   | No             | Yes           |
+| Data lineage            | No             | Yes           |
+| Multi-workspace support | No             | Yes           |
+
+
+Unity Catalog Storage Structure
+
+Unity Catalog stores data in external cloud storage such as:
+
+AWS S3
+
+Azure Data Lake Storage
+
+Google Cloud Storage
+
+But metadata is managed centrally by Databricks.
+
+21. what are cross layer considertaions? -- refer to document in Drive (Day3_Cross-Layer Considerations)
+
+22. databricks sql vs spark sql
+
+Key Differences:
+
+| Feature        | Spark SQL        | Databricks SQL        |
+| -------------- | ---------------- | --------------------- |
+| Purpose        | Data engineering | Analytics & BI        |
+| Users          | Data engineers   | Data analysts         |
+| Runs on        | Spark cluster    | SQL Warehouse         |
+| Programming    | Python/Scala/SQL | Pure SQL              |
+| Performance    | Good             | Optimized with Photon |
+| BI Integration | Limited          | Strong                |
+
+
+23.what are various glue integration patterns available -- refer to drive documentation
+
+24.what are various spark sql operations we can perform?
+
+25.What are UDF in Spark SQL And provide with examples.
+
+---------------------------
+Integrations in Databricks:
+---------------------------
+
+26.How do we integrate S3 with Databricks? ( for detailed steps  using below methods refer Amazon S3 Integration with Databricks-Day4 / S3 Integration with Databricks using External Locations Creation steps - Day2)
+
+
+   Method 1- Using Access Keys 
+   Method 2: Using Unity Catalog (Modern & Secure)
+   Method 3: (IAM Role / Instance Profile)
+
+27. how to manage the data in s3 using databricks? (refer How to Manage Data in S3 Using Data_DAY5)
+
+27.How do you mount s3 with Databricks with IAM Roles? ( refer to Mounting Amazon S3 in Databricks (1))
+
+28..How to you perform Glue Integration with databricks? ( refer Amazon S3 Integration with Databricks-Day4)
+
+  Two Integration Options available
+
+   1.Using Glue as Hive Metastore (Legacy Way)
+
+   2.Recommended: Using Unity Catalog + Glue (Modern Approach)
+
+
+29. JDBC connection steps with Amazon RDS(refer to Databricks JDBC Connection with RDS Aurora MySQL- Step by Step Process_DAY4)
+
+30.
+
+
+
+
+
+
+
+

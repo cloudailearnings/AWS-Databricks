@@ -1,0 +1,25 @@
+
+     ________ ___   / /  ___
+    / __/ __// _ | / /  / _ |
+  __\ \/ /__/ __ |/ /__/ __ |
+ /____/\___/_/ |_/____/_/ | |
+                          |/
+
+Checking if a JVM is installed
+Found a JVM installed under C:\Program Files\Eclipse Adoptium\jdk-11.0.30.7-hotspot.
+
+Checking if ~\AppData\Local\Coursier\data\bin is in PATH
+  Should we add ~\AppData\Local\Coursier\data\bin to your PATH? [Y/n] y
+
+Checking if the standard Scala applications are installed
+  Installed ammonite
+  Installed cs
+  Installed coursier
+  Installed scala
+  Installed scalac
+  Installed scala-cli
+  Installed sbt
+  Installed sbtn
+  Installed scalafmt
+
+Press "ENTER" to continue...

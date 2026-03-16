@@ -1,0 +1,106 @@
+Steps for Data Flow :
+
+S3 (Employee.csv upload)
+        ↓
+Lambda (reads file)
+        ↓
+Kinesis Data Stream (ds_stream_emp)
+        ↓
+Firehose (fs_stream_emp)
+        ↓
+Destination (likely S3 bucket)
+
+--------------------------------------
+
+1. Source S3 Bucket creation:
+
+create source bucket src_kinesis_lambda1
+
+Upload File Employee.csv
+
+also create event notification in s3 properties with PUT event
+
+2. Create Lambda function:
+
+  name: triggerlambda1
+
+  create trigger by click on ADD trigger
+
+  in the trigger add event types : All object create events and choose bucket name 
+
+  In the code Add Python code for lambda function
+
+  also create a new Test event using below json format
+
+            {
+  "Records": [
+    {
+      "s3": {
+        "bucket": {
+          "name": "src-lambda-kinesis"
+        },
+        "object": {
+          "key": "Employee.csv"
+        }
+      }
+    }
+  ]
+}
+
+
+click on deploy for saving code changes
+
+click on TEST for testing 
+
+Set up IAM roles triggerlambda-role-yx0dc94d by adding permissions for S3fullaccess and kinessfullaccess
+
+for reading and writing s3 and kinesis data streams
+
+
+	
+Policy name 
+	
+Type
+	
+Attached entities
+
+AmazonKinesisFullAccess
+AWS managed
+2
+AmazonS3FullAccess
+AWS managed
+4
+AWSLambdaBasicExecutionRole-c2df5fa7-671c-4e22-895c-78a3b20bf771
+Customer managed
+1
+
+
+-----------------------------
+
+
+Kinesis:
+
+ Create Data stream using kinesis data stream service
+
+  ds_stream_emp
+--------------------------------
+
+Amazon Data firehouse service:
+
+
+create firehouse data stream -- fs_stream_emp
+
+Amazon Data Firehose: How it works
+
+Choose source and destination
+Specify the source and the destination for your Firehose stream. You cannot change the source and destination of your Firehose stream once it has been created.
+
+Source:
+
+Choose a source  -- ds_stream_emp
+
+Destination:
+
+Choose a destination -- S3 target bucket name
+
+----------------------------------------------------------

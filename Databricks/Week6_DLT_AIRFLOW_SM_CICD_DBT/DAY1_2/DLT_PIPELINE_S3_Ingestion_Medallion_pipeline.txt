@@ -1,0 +1,65 @@
+-- Enable auto optimize
+SET pipelines.autoOptimize.managed = true;
+
+-- Bronze: Raw customers ingestion
+
+CREATE MATERIALIZED VIEW bronze_customers_s3_ingestion
+AS
+SELECT *
+FROM read_files(
+  's3://glue1235/raw_customers.csv',
+  format => 'csv',
+  header => true
+);
+
+CREATE MATERIALIZED VIEW silver_customers_S3
+(
+  CONSTRAINT valid_customer_id EXPECT (customer_id IS NOT NULL),
+  CONSTRAINT valid_email EXPECT (email LIKE '%@%')
+)
+COMMENT "Cleaned and transformed customer data"
+AS
+SELECT
+    CAST(customer_id AS INT)                 AS customer_id,
+    INITCAP(TRIM(first_name))                AS first_name,
+    INITCAP(TRIM(last_name))                 AS last_name,
+    LOWER(TRIM(email))                       AS email,
+    REGEXP_REPLACE(phone, '[^0-9]', '')      AS phone,
+    INITCAP(TRIM(city))                      AS city,
+    TO_DATE(signup_date)                     AS signup_date,
+    TO_TIMESTAMP(updated_at)                 AS updated_at,
+    CURRENT_TIMESTAMP()                      AS processed_timestamp
+FROM bronze_customers_s3_ingestion
+WHERE customer_id IS NOT NULL
+QUALIFY ROW_NUMBER() OVER (
+    PARTITION BY customer_id
+    ORDER BY updated_at DESC
+) = 1;
+
+-- GOLD LOADS
+
+CREATE MATERIALIZED VIEW gold_customers_by_city_S3
+COMMENT "Customer distribution by city"
+AS
+SELECT
+    city,
+    COUNT(*) AS total_customers
+FROM silver_customers_S3
+GROUP BY city;
+
+CREATE MATERIALIZED VIEW gold_customer_signup_trend_S3
+COMMENT "Monthly customer signup trend"
+AS
+SELECT
+    DATE_FORMAT(signup_date, 'yyyy-MM') AS signup_month,
+    COUNT(*) AS total_signups
+FROM silver_customers_s3
+GROUP BY DATE_FORMAT(signup_date, 'yyyy-MM');
+
+CREATE MATERIALIZED VIEW gold_active_customers_s3
+COMMENT "Customers updated in last 90 days"
+AS
+SELECT
+    COUNT(*) AS active_customers
+FROM silver_customers_s3
+WHERE updated_at >= current_date() - INTERVAL 90 DAYS;
